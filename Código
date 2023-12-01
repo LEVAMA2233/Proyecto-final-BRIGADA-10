@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
+
 // Estructura tipo PUMA
 struct PUMA{
     int numeroCuenta;
@@ -21,8 +22,11 @@ void mostrarTodosLosEstudiantes(FILE *archivo);
 void agregarEstudiante(FILE *archivo);
 void buscarEstudiante(FILE *archivo);
 
+//Fin de prototipos de funciones
+
 int main() {
-    FILE *archivo = fopen("finally.txt", "a+");
+	const char *ruta = "C:\\Users\\IdeaPad\\Documents\\finally.txt";
+    FILE *archivo = fopen(ruta, "a+");
 
     if (archivo == NULL) {
         printf("Hubo un error al abrir el archivo");
@@ -47,6 +51,7 @@ int main() {
             	printf("MOSTRANDO ESTDUDIANTES\n");
                 printf("-------------------------------\n");
 				mostrarTodosLosEstudiantes(archivo);
+				
                 break;
             case 2:
                 agregarEstudiante(archivo);
@@ -65,7 +70,8 @@ int main() {
     fclose(archivo);
 
     return 0;
-}
+}//Fin de main
+
 
 void muestraDatos(struct PUMA estudiante) {
     printf("Numero de cuenta: %d\n", estudiante.numeroCuenta);
@@ -79,13 +85,15 @@ void muestraDatos(struct PUMA estudiante) {
     printf("Calificacion Igualdad de genero: %.2f\n", estudiante.calificacion[6]);
 }
 
+
 void Promedio(struct PUMA estudiante) {
     float promedio = 
 	(estudiante.calificacion[0] + estudiante.calificacion[1]+estudiante.calificacion[2]
 	+estudiante.calificacion[3]+estudiante.calificacion[4]+estudiante.calificacion[5]
 	+estudiante.calificacion[6]) / 7;
-    printf("Promedio--> %.2f\n", promedio);
+    printf("Promedio general alumno,cuenta:[%d]--> %.2f\n",estudiante.numeroCuenta, promedio);
 }
+
 
 void mostrarTodosLosEstudiantes(FILE *archivo) {
     rewind(archivo); // Regresa al inicio del archivo
@@ -98,12 +106,13 @@ void mostrarTodosLosEstudiantes(FILE *archivo) {
 			&estudiante.calificacion[2],&estudiante.calificacion[3],
 			&estudiante.calificacion[4],&estudiante.calificacion[5],
 			&estudiante.calificacion[6])== 9) {//la función fscanf devuelve un 9 si logra leer correctamente
-											  // los 9 datos de la estructura estudiante
-        muestraDatos(estudiante);
+											  // los 9 datos de la estructura estudiante, esto se repite
+        muestraDatos(estudiante);             //para cada alumno
         Promedio(estudiante);
         printf("-------------------------------\n");
     }
 }
+
 
 void agregarEstudiante(FILE *archivo) {
     struct PUMA nuevoEstudiante;
@@ -112,7 +121,7 @@ void agregarEstudiante(FILE *archivo) {
     scanf("%d", &nuevoEstudiante.numeroCuenta);
 
     printf("Ingrese el nombre del estudiante(Empezando por apellido Paterno y separando con ""_""):" );
-    scanf("%s", nuevoEstudiante.nombre);
+    scanf("%s", nuevoEstudiante.nombre);//El nombre se ingresa sin espacios para evitar errores
 
     printf("Ingrese la calificacion de Algebra: ");
     scanf("%f", &nuevoEstudiante.calificacion[0]);
@@ -144,30 +153,60 @@ void agregarEstudiante(FILE *archivo) {
     printf("Estudiante agregado correctamente.\n");
 }
 
-void buscarEstudiante(FILE *archivo) {
-    int numeroCuentaBuscado;
-    printf("Ingrese el numero de cuenta del estudiante a buscar: ");
-    scanf("%d", &numeroCuentaBuscado);
 
-    struct PUMA estudiante;
+void agregarEstudiante(FILE *archivo) {
+    struct PUMA nuevoEstudiante,estudianteExistente;
 
-    rewind(archivo); // Regresa al inicio del archivo
+    printf("Ingrese el numero de cuenta del nuevo estudiante: ");
+    scanf("%d", &nuevoEstudiante.numeroCuenta);
 
-    while (fscanf(archivo, "%d %s %f %f %f %f %f %f %f",
-                  &estudiante.numeroCuenta, estudiante.nombre,
-                  &estudiante.calificacion[0], &estudiante.calificacion[1],&estudiante.calificacion[2],
-				  &estudiante.calificacion[3],&estudiante.calificacion[4],
-				  &estudiante.calificacion[5],&estudiante.calificacion[6]) == 9) {
-        
-		if (estudiante.numeroCuenta == numeroCuentaBuscado) {
-            muestraDatos(estudiante);
-            Promedio(estudiante);
-            return; // Sale del bucle una vez que se encuentra el estudiante
+    rewind(archivo);
+    
+    while (fscanf(archivo, "%d", &estudianteExistente.numeroCuenta) == 1) {//verifica uno a uno
+    																	   //los números de cuenta	
+        if (estudianteExistente.numeroCuenta == nuevoEstudiante.numeroCuenta) {
+            printf("Error: El numero de cuenta ya existe. No se puede agregar el estudiante.\n");
+            return;
         }
+        while (fgetc(archivo) != '\n' && !feof(archivo)) {}
     }
 
-    printf("##El numero de cuenta no esta asociado a ningun estudiante.##\n");
+    // Resto del ingreso de datos
+    printf("Ingrese el nombre del estudiante (Empezando por apellido Paterno y separando con '_'):");
+    scanf("%s", nuevoEstudiante.nombre);
+
+    printf("Ingrese la calificacion de Algebra: ");
+    scanf("%f", &nuevoEstudiante.calificacion[0]);
+
+    printf("Ingrese la calificacion de Calculo y geometria analitica: ");
+    scanf("%f", &nuevoEstudiante.calificacion[1]);
+
+    printf("Ingrese la calificacion de Quimica: ");
+    scanf("%f", &nuevoEstudiante.calificacion[2]);
+
+    printf("Ingrese la calificacion de Laboratorio de quimica: ");
+    scanf("%f", &nuevoEstudiante.calificacion[3]);
+
+    printf("Ingrese la calificacion de Fundamentos de programacion: ");
+    scanf("%f", &nuevoEstudiante.calificacion[4]);
+
+    printf("Ingrese la calificacion de Redaccion y exposicion de temas: ");
+    scanf("%f", &nuevoEstudiante.calificacion[5]);
+
+    printf("Ingrese la calificacion de Igualdad de genero: ");
+    scanf("%f", &nuevoEstudiante.calificacion[6]);
+
+    // Agregar el estudiante solo si el número de cuenta no existe
+    fprintf(archivo, "%d %s %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
+            nuevoEstudiante.numeroCuenta, nuevoEstudiante.nombre,
+            nuevoEstudiante.calificacion[0], nuevoEstudiante.calificacion[1], nuevoEstudiante.calificacion[2],
+            nuevoEstudiante.calificacion[3], nuevoEstudiante.calificacion[4], nuevoEstudiante.calificacion[5],
+            nuevoEstudiante.calificacion[6]);
+
+    printf("Estudiante agregado correctamente.\n");
 }
+
+
 
 void modificarCalificacion(FILE *archivo) {
     int numeroCuentaModificar;
@@ -179,16 +218,16 @@ void modificarCalificacion(FILE *archivo) {
     printf("Ingrese el número de la materia a modificar (1-7):\n");
     scanf("%d", &materiaModificar);
 
-    if (materiaModificar < 1 || materiaModificar > 7) {
+    if (materiaModificar < 1 || materiaModificar > 7) {//Se valida que la materia exista
         printf("Número de materia no válido.\n");
         return;
     }
 
     struct PUMA estudiante;
 
-    // Crear un archivo temporal para almacenar los datos con la modificación
-    FILE *archivoNuevo = fopen("modificaCALF.txt", "w");
-    rewind(archivo);
+    // Creamos un archivo temporal para almacenar los datos con la modificación
+    FILE *archivoNuevo = fopen("modificaCALF.txt", "w");//Se abre en modo escritura para modificar todo
+    rewind(archivo);//Regresamos al inicio del archivo
 
     while (fscanf(archivo, "%d %s %f %f %f %f %f %f %f",
                   &estudiante.numeroCuenta, estudiante.nombre,
@@ -209,11 +248,11 @@ void modificarCalificacion(FILE *archivo) {
                 estudiante.numeroCuenta, estudiante.nombre,
                 estudiante.calificacion[0], estudiante.calificacion[1], estudiante.calificacion[2],
                 estudiante.calificacion[3], estudiante.calificacion[4], estudiante.calificacion[5],
-                estudiante.calificacion[6]);
+                estudiante.calificacion[6]);//Volvemos a escribir los datos en el archivo Nuevo
     }
 
-    fclose(archivoNuevo);
-    fclose(archivo);
+    fclose(archivoNuevo);//Cerramos los archivos
+    fclose(archivo);      
 
     remove("finally.txt");             // Elimina el archivo original
     rename("modificaCALF.txt", "finally.txt"); // Renombra el archivo temporal
